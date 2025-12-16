@@ -112,7 +112,7 @@ local window = Rayfield:CreateWindow({
     LoadingTitle = "Initializing Framework",
     LoadingSubtitle = "GUI made by @more-more-more",
     ConfigurationSaving = {
-        Enabled = true,
+        Enabled = false,
         FolderName = "FXT Framework",
         FileName = "Configuration"
     },
@@ -297,7 +297,3 @@ Rayfield:Notify({
     Duration = 5,
     Image = 4483362458
 })
-
--- Load configuration
-
-Rayfield:LoadConfiguration()
