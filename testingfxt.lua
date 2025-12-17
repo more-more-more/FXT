@@ -1,7 +1,6 @@
+-- [[
 --//Rayfield Lib Loader\\--
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-
--- Threats made the lock below
 
 -- // CONFIG \\ --
 _G.Config = {
@@ -31,57 +30,59 @@ _G.Variables = {
     ["Aimbot_Target"] = nil
 };
 
-_G.Signals = {}
+_G.Signals = {};
 
 -- // FUNCTIONS \\ --
-_G.Functions = {}
+_G.Functions = {};
 
 function _G.Functions.FOV_Search()
-    local Target
-    local Distance = _G.Config.Aimbot.FOV
+    local Target;
+    local Distance = _G.Config.Aimbot.FOV;
 
     for _, Player in _G.Variables.Players:GetPlayers() do
-        if Player == _G.Variables.Player then continue end
-        if not Player.Character then continue end
-        if not Player.Character:FindFirstChild("HumanoidRootPart") then continue end
+        if Player == _G.Variables.Player then continue end;
+        if not Player.Character then continue end;
+        if not Player.Character:FindFirstChild("HumanoidRootPart") then continue end;
 
-        local Player_Position, On_Screen = _G.Variables.Camera:WorldToScreenPoint(Player.Character.HumanoidRootPart.Position)
-        Player_Position = Vector2.new(Player_Position.X, Player_Position.Y)
-        local Mouse_Position = Vector2.new(_G.Variables.Mouse.X, _G.Variables.Mouse.Y)
+        local Player_Position, On_Screen = _G.Variables.Camera:WorldToScreenPoint(Player.Character.HumanoidRootPart.Position);
+        Player_Position = Vector2.new(Player_Position.X, Player_Position.Y);
+        local Mouse_Position = Vector2.new(_G.Variables.Mouse.X, _G.Variables.Mouse.Y);
 
         if On_Screen and (Player_Position - Mouse_Position).Magnitude <= Distance then
-            Distance = (Player_Position - Mouse_Position).Magnitude
-            Target = Player.Character
-        end
-    end
+            Distance = (Player_Position - Mouse_Position).Magnitude;
+            Target = Player.Character;
+        end;
+    end;
 
-    return Target
-end
+    return Target;
+end;
 
-function _G.Functions.Toggle.Aimbot()
-    _G.Variables.Aimbot_Toggled = not _G.Variables.Aimbot_Toggled
-    _G.Variables.Aimbot_Target = nil
+function _G.Functions.Toggle_Aimbot()
+    _G.Variables.Aimbot_Toggled = not _G.Variables.Aimbot_Toggled;
+    _G.Variables.Aimbot_Target = nil;
 
     Rayfield:Notify({
         Title = "Camlock",
         Content = _G.Variables.Aimbot_Toggled and "Enabled" or "Disabled",
         Duration = 2,
         Image = 4483362458
-    })
-end
+    });
+end;
 
 function _G.Functions.Aimbot_Main()
-    if not _G.Config.Aimbot.Enabled then return end
-    if not _G.Variables.Aimbot_Toggled then return end
+    if not _G.Config.Aimbot.Enabled then return end;
+    if not _G.Variables.Aimbot_Toggled then return end;
+
+    print(_G.Variables.Aimbot_Toggled)
 
     if not _G.Variables.Aimbot_Target or not _G.Variables.Aimbot_Target:FindFirstChild("HumanoidRootPart") then
-        _G.Variables.Aimbot_Target = _G.Functions.FOV_Search()
-    end
+        _G.Variables.Aimbot_Target = _G.Functions.FOV_Search();
+    end;
 
     if _G.Variables.Aimbot_Target and _G.Variables.Aimbot_Target:FindFirstChild("HumanoidRootPart") then
-        _G.Variables.Camera.CFrame = CFrame.lookAt(_G.Variables.Camera.CFrame.Position, _G.Variables.Aimbot_Target.HumanoidRootPart.Position)
-    end
-end
+        _G.Variables.Camera.CFrame = CFrame.lookAt(_G.Variables.Camera.CFrame.Position, _G.Variables.Aimbot_Target.HumanoidRootPart.Position);
+    end;
+end;
 
 function _G.Functions.Panic()
     Rayfield:Notify({
@@ -89,52 +90,25 @@ function _G.Functions.Panic()
         Content = "Terminating now...",
         Duration = 2,
         Image = 4483362458
-    })
+    });
     
     task.defer(function()
         for _, Signal in _G.Signals do
-            Signal:Disconnect()
-        end
+            Signal:Disconnect();
+        end;
 
-        _G.Signals = nil
-        _G.Config = nil
-        _G.Functions = nil
-        _G.Variables = nil
+        _G.Signals = nil;
+        _G.Config = nil;
+        _G.Functions = nil;
+        _G.Variables = nil;
         
-        task.wait(0.5)
-        Rayfield:Destroy()
-    end)
+        Rayfield:Destroy();
+    end);
 end
 
 -- // Window
-local window = Rayfield:CreateWindow({
-    Name = "FXT", -- Flex x Threats 
-    LoadingTitle = "Initializing Framework",
-    LoadingSubtitle = "GUI made by @more-more-more",
-    ConfigurationSaving = {
-        Enabled = false,
-        FolderName = "FXT Framework",
-        FileName = "Configuration"
-    },
-    Discord = {
-        Enabled = false,
-        Invite = "noinvitelink",
-        Remember = true
-    },
-    KeySystem = false,
-    KeySettings = {
-        Title = "Key System",
-        Subtitle = "Enter your key here",
-        Note = "Get your own key at _________",
-        FileName = "KeyPlace",
-        SaveKey = true,
-        GrabKeyFromSite = false,
-        Key = {"FuckThreatsNigga123"}
-    },
-     
-    -- Main Colors
-    Theme = {
-        TextColor = Color3.fromRGB(255, 255, 255,),
+    local Theme = {
+        TextColor = Color3.fromRGB(255, 255, 255),
         Background = Color3.fromRGB(15, 3, 3),
         Topbar = Color3.fromRGB(25, 8, 8),
         Shadow = Color3.fromRGB(0, 0, 0),
@@ -144,8 +118,8 @@ local window = Rayfield:CreateWindow({
         NotificationActionBackground = Color3.fromRGB(50, 50, 50),
 
         -- Tabs
-        TabBackground = Color3.fromRGB(30, 10, 10)
-        TabStroke Color3.fromRGB(80, 20, 20),
+        TabBackground = Color3.fromRGB(30, 10, 10),
+        TabStroke = Color3.fromRGB(80, 20, 20),
         TabBackgroundSelected = Color3.fromRGB(120, 25, 25),
         TabTextColor = Color3.fromRGB(200, 150, 150),
         SelectedTabTextColor = Color3.fromRGB(255, 255, 255),
@@ -180,6 +154,32 @@ local window = Rayfield:CreateWindow({
         InputStroke = Color3.fromRGB(100, 25, 25),
         InputText = Color3.fromRGB(255, 255, 255)
     }
+
+local Window = Rayfield:CreateWindow({
+    Name = "FXT", -- Flex x Threats 
+    LoadingTitle = "Initializing Framework",
+    LoadingSubtitle = "GUI made by @more-more-more",
+    Theme = Theme,
+    ConfigurationSaving = {
+        Enabled = false,
+        FolderName = "FXT Framework",
+        FileName = "Configuration"
+    },
+    Discord = {
+        Enabled = false,
+        Invite = "noinvitelink",
+        Remember = true
+    },
+    KeySystem = false,
+    KeySettings = {
+        Title = "Key System",
+        Subtitle = "Enter your key here",
+        Note = "Get your own key at _________",
+        FileName = "KeyPlace",
+        SaveKey = true,
+        GrabKeyFromSite = false,
+        Key = {"FuckThreatsNigga123"}
+    },
 })
 
 --// Beginning of Tabs \\--
@@ -192,10 +192,10 @@ local MainSection = MainTab:CreateSection("Features")
 
 -- Button 1: Camlock
 
-local Button = MainTab:CreateButton({
+local CamlockToggle = MainTab:CreateToggle({
     Name = "Camlock",
     CurrentValue = _G.Config.Aimbot.Enabled,
-    Flag = "CamlockEnabled,
+    Flag = "CamlockEnabled",
     Callback = function(Value)
         _G.Config.Aimbot.Enabled = Value
         Rayfield:Notify({
@@ -216,7 +216,7 @@ local FOVSlider = MainTab:CreateSlider({
     CurrentValue = _G.Config.Aimbot.FOV,
     Flag = "CamlockFOV",
     Callback = function(Value)
-        _G.Config.Aimbot.Fov = Value
+        _G.Config.Aimbot.FOV = Value
     end
 })
 
@@ -256,7 +256,7 @@ local PanicKey = MainTab:CreateKeybind({
 
 -- Button: Manual Panic
 local PanicButton = MainTab:CreateButton({
-    Name = "Panic (Destroy GUI)"
+    Name = "Panic (Destroy GUI)",
     Callback = function()
         _G.Functions.Panic()
     end
@@ -272,9 +272,10 @@ MainTab:CreateLabel("Panic destroys GUI")
 -- // RUN TIME \\ --
 _G.Signals.Render_Stepped = _G.Variables.Run_Service.RenderStepped:Connect(function()
     task.spawn(_G.Functions.Aimbot_Main)
-end)
+end);
 
 _G.Signals.Input_Began = _G.Variables.User_Input_Service.InputBegan:Connect(function(Input, Processed)
+    print(_G.Config.Aimbot.Keybind);
     if Processed then return end
     if not _G.Config then return end
 
@@ -287,7 +288,7 @@ _G.Signals.Input_Began = _G.Variables.User_Input_Service.InputBegan:Connect(func
         _G.Functions.Panic()
         return
     end
-end)
+end);
 
 -- Success Notify
 
@@ -296,4 +297,4 @@ Rayfield:Notify({
     Content = "Test system has loaded.",
     Duration = 5,
     Image = 4483362458
-})
+}) ]]--
