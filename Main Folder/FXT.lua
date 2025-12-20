@@ -5,10 +5,16 @@ local CONFIG = {
     Decimals = 4,
     ValueText = "Value Is Now :",
     Window = {
-        CheatName = "FXT Enhancements",
+        CheatName = "Augmented",
         Size = UDim2.new(0, 510, 0, 600)
     }
 }
+
+pcall(function()
+    for _, v in pairs(getconnections(game:GetService("LogService").MessageOut)) do
+        v:Disable()
+    end
+end)
 
 -- // Initialize Table
 _G.GUI = _G.GUI or {}
@@ -41,6 +47,10 @@ end)
 
 if not windowSuccess then return warn("Failed to create window") end
 _G.GUI.Window1 = Window1
+
+
+-- Load Arrows Module
+local ArrowsModule = loadstring(game:HttpGet("https://raw.githubusercontent.com/more-more-more/cred/refs/heads/main/arrows.lua"))()
 
 -- // Load Radar Module
 local RadarModule = {}
@@ -141,7 +151,7 @@ local ok, err = pcall(function()
     Visuals_ViewTracer = Visuals:AddSection("View Tracer",2)
 
     -- Arrows
-    Visuals_Arrows:AddToggle({text = "Enabled", tooltip = "Shows arrows pointing to offscreen players", flag = "Visuals_Arrows_Enabled", state = false, risky = false, callback = function(v) end}):AddBind({text = "Arrows", tooltip = "Toggles arrows", bind = Enum.KeyCode.H, mode = "toggle", flag = "Visuals_Arrows_Keybind", callback = function(v) _G.GUI.Library.options.Visuals_Arrows_Enabled:SetState(v) end})
+    Visuals_Arrows:AddToggle({text = "Enabled", tooltip = "Shows arrows pointing to offscreen players", flag = "Visuals_Arrows_Enabled", state = false, risky = false, callback = function(v) if v then ArrowsModule:Enable() else ArrowsModule:Disable() end end }):AddBind({text = "Arrows", tooltip = "Toggles arrows", bind = Enum.KeyCode.H, mode = "toggle", flag = "Visuals_Arrows_Keybind", callback = function(v) _G.GUI.Library.options.Visuals_Arrows_Enabled:SetState(v) end})
     Visuals_Arrows:AddList({text = "Toggle Mode", tooltip = "Toggle behavior for arrows", flag = "Visuals_Arrows_Mode", values = {"Toggle", "Hold", "Always"}, callback = function(v) end})
     Visuals_Arrows:AddSlider({text = "Arrow Size", tooltip = "Size of the offscreen arrows", flag = "Visuals_Arrow_Size", min = 5, max = 30, increment = 1, value = 15, callback = function(v) end})
     Visuals_Arrows:AddSlider({text = "Radius", tooltip = "Distance from screen center", flag = "Visuals_Arrow_Radius", min = 20, max = 300, increment = 1, value = 150, callback = function(v) end})
@@ -184,18 +194,92 @@ local ok, err = pcall(function()
     Visuals_ViewTracer:AddSlider({text = "Length", tooltip = "View tracer length", flag = "Visuals_ViewTracer_Length", min = 50, max = 1000, increment = 10, value = 300, callback = function(v) end})
 
     -- Movement sections
+    Movement_Flight = Movement:AddSection("Flight",1)
+    Movement_Spin = Movement:AddSection("Spin",1)
+    Movement_Teleport = Movement:AddSection("Teleport",1)
+    Movement_Cframe = Movement:AddSection("Cframe",2)
+    Movement_Orbit = Movement:AddSection("Orbit",2)
+    Movement_Noclip = Movement:AddSection("Noclip",2)
 
+    -- Flight
+    Movement_Flight:AddToggle({text = "Enabled", tooltip = "Toggle flight", flag = "Movement_Flight_Enabled", state = false, risky = false, callback = function(v) end}):AddBind({text = "Flight", tooltip = "Toggles Flight", bind = Enum.KeyCode.F, mode = "toggle", flag = "Movement_Flight_Keybind", callback = function(v) if _G.GUI and _G.GUI.Library and _G.GUI.Library.options and _G.GUI.Library.options.Movement_Flight_Enabled then _G.GUI.Library.options.Movement_Flight_Enabled:SetState(v) end end})
+    Movement_Flight:AddList({text = "Toggle Mode", tooltip = "Toggle behavior for flight", flag = "Movement_Flight_Mode", values = {"Toggle", "Hold", "Always"}, callback = function(v) end})
+    Movement_Flight:AddSlider({text = "Speed", tooltip = "Flight speed", flag = "Movement_Flight_Speed", min = 10, max = 300, increment = 5, value = 50, callback = function(v) end})
 
-    -- Misc sections
+    -- Spin
+    Movement_Spin:AddToggle({text = "Enabled", tooltip = "Spin your character", flag = "Movement_Spin_Enabled", state = false, risky = false, callback = function(v) end}):AddBind({text = "Spin", bind = Enum.KeyCode.G, mode = "toggle", flag = "Movement_Spin_Keybind", callback = function(v) if _G.GUI and _G.GUI.Library and _G.GUI.Library.options and _G.GUI.Library.options.Movement_Spin_Enabled then _G.GUI.Library.options.Movement_Spin_Enabled:SetState(v) end end})
+    Movement_Spin:AddList({text = "Toggle Mode", tooltip = "Toggle behavior for spin", flag = "Movement_Spin_Mode", values = {"Toggle", "Hold", "Always"}, callback = function(v) end})
+    Movement_Spin:AddSlider({text = "Speed", tooltip = "Spin speed", flag = "Movement_Spin_Speed", min = 1, max = 50, increment = 1, value = 10, callback = function(v) end})
 
+    -- Teleport
+    Movement_Teleport:AddList({text = "Target Player", tooltip = "Select player to teleport to", flag = "Movement_Teleport_Player", values = {"None"}, callback = function(v) end})
+    Movement_Teleport:AddButton({text = "Teleport to Player", tooltip = "Teleport to selected player", callback = function() if not _G.GUI or not _G.GUI.Library or not _G.GUI.Library.options or not _G.GUI.Library.options.Movement_Teleport_Player then return end local targetName = _G.GUI.Library.options.Movement_Teleport_Player.selected if not targetName or targetName == "" or targetName == "None" then return end local Player = game:GetService("Players").LocalPlayer local Target = game:GetService("Players"):FindFirstChild(targetName) if Target and Target.Character then local Character = Player.Character if Character then local HRP = Character:FindFirstChild("HumanoidRootPart") local TargetHRP = Target.Character:FindFirstChild("HumanoidRootPart") if HRP and TargetHRP then HRP.CFrame = TargetHRP.CFrame * CFrame.new(0, 0, 3) end end end end})
+    
+    -- Cframe Speed
+    Movement_Cframe:AddToggle({text = "Enabled", tooltip = "Move using CFrame", flag = "Movement_Cframe_Enabled", state = false, risky = false, callback = function(v) end}):AddBind({text = "CFrame Speed", bind = Enum.KeyCode.C, mode = "toggle", flag = "Movement_Cframe_Keybind", callback = function(v) if _G.GUI and _G.GUI.Library and _G.GUI.Library.options and _G.GUI.Library.options.Movement_Cframe_Enabled then _G.GUI.Library.options.Movement_Cframe_Enabled:SetState(v) end end})
+    Movement_Cframe:AddList({text = "Toggle Mode", tooltip = "Toggle behavior for cframe", flag = "Movement_Cframe_Mode", values = {"Toggle", "Hold", "Always"}, callback = function(v) end})
+    Movement_Cframe:AddSlider({text = "Speed", tooltip = "CFrame speed", flag = "Movement_Cframe_Speed", min = 0.1, max = 5, increment = 0.1, value = 0.5, callback = function(v) end})
+
+    -- Orbit
+    Movement_Orbit:AddToggle({text = "Enabled", tooltip = "Orbit around players", flag = "Movement_Orbit_Enabled", state = false, risky = false, callback = function(v) end}):AddBind({text = "Orbit", bind = Enum.KeyCode.O, mode = "toggle", flag = "Movement_Orbit_Keybind", callback = function(v) if _G.GUI and _G.GUI.Library and _G.GUI.Library.options and _G.GUI.Library.options.Movement_Orbit_Enabled then _G.GUI.Library.options.Movement_Orbit_Enabled:SetState(v) end end})
+    Movement_Orbit:AddList({text = "Toggle Mode", tooltip = "Toggle behavior for orbit", flag = "Movement_Orbit_Mode", values = {"Toggle", "Hold", "Always"}, callback = function(v) end})
+    Movement_Orbit:AddList({text = "Target Player", tooltip = "Select player to orbit", flag = "Movement_Orbit_Player", values = {"None"}, callback = function(v) end})
+    Movement_Orbit:AddButton({text = "Refresh Players", tooltip = "Refresh player list", callback = function() local players = {"None"} for _, plr in pairs(game:GetService("Players"):GetPlayers()) do if plr ~= game:GetService("Players").LocalPlayer then table.insert(players, plr.Name) end end if _G.GUI and _G.GUI.Library and _G.GUI.Library.options and _G.GUI.Library.options.Movement_Orbit_Player then _G.GUI.Library.options.Movement_Orbit_Player.values = players if #players > 0 then _G.GUI.Library.options.Movement_Orbit_Player:Select(players[1]) end end end})    Movement_Orbit:AddSlider({text = "Radius", tooltip = "Orbit radius", flag = "Movement_Orbit_Radius", min = 5, max = 50, increment = 1, value = 10, callback = function(v) end})
+    Movement_Orbit:AddSlider({text = "Speed", tooltip = "Orbit speed", flag = "Movement_Orbit_Speed", min = 1, max = 20, increment = 1, value = 5, callback = function(v) end})
+
+    -- Noclip
+    Movement_Noclip:AddToggle({text = "Enabled", tooltip = "Walk through walls", flag = "Movement_Noclip_Enabled", state = false, risky = false, callback = function(v) end}):AddBind({text = "Noclip", bind = Enum.KeyCode.X, mode = "toggle", flag = "Movement_Noclip_Keybind", callback = function(v) if _G.GUI and _G.GUI.Library and _G.GUI.Library.options and _G.GUI.Library.options.Movement_Noclip_Enabled then _G.GUI.Library.options.Movement_Noclip_Enabled:SetState(v) end end})
 
     pcall(function() task.wait(0.1) Main:Select() end)
 end)
+    if not ok then warn("FXT somewhere, Locate it here:", err) end
 
-if not ok then warn("FXT somewhere, Locate it here:", err) end
+    task.spawn(function()
+        task.wait(1)
+        if _G.GUI and _G.GUI.Library and _G.GUI.Library.options then
+            if _G.GUI.Library.options.Movement_Teleport_Player then
+                local players = {"None"}
+                for _, plr in pairs(game:GetService("Players"):GetPlayers()) do
+                    if plr ~= game:GetService("Players").LocalPlayer then
+                        table.insert(players, plr.Name)
+                    end
+                end
+                _G.GUI.Library.options.Movement_Teleport_Player.values = players
+                if #players > 0 then
+                    _G.GUI.Library.options.Movement_Teleport_Player:Select(players[1])
+                end
+            end
+            if _G.GUI.Library.options.Movement_Orbit_Player then
+                local players = {"None"}
+                for _, plr in pairs(game:GetService("Players"):GetPlayers()) do
+                    if plr ~= game:GetService("Players").LocalPlayer then
+                        table.insert(players, plr.Name)
+                    end
+                end
+                _G.GUI.Library.options.Movement_Orbit_Player.values = players
+                if #players > 0 then
+                    _G.GUI.Library.options.Movement_Orbit_Player:Select(players[1])
+                end
+            end
+        end
+    end)
 
-    -- // Load Time Notification
-    pcall(function()
-        local LoadTime = string.format("%." .. CONFIG.Decimals .. "f", os.clock() - Clock)
-        _G.GUI.Library:SendNotification("Loaded In " .. LoadTime, 6)
+    task.wait(1)
+    local FlightBV = nil
+    game:GetService("RunService").Heartbeat:Connect(function()
+        pcall(function()
+            if not _G.GUI or not _G.GUI.Library or not _G.GUI.Library.options then return end
+            local Player = game:GetService("Players").LocalPlayer
+            if not Player then return end
+            local Character = Player.Character
+            if not Character then return end
+            local HRP = Character:FindFirstChild("HumanoidRootPart")
+            if not HRP then return end
+            local opts = _G.GUI.Library.options
+            if opts.Movement_Flight_Enabled and opts.Movement_Flight_Enabled.state then if not FlightBV then FlightBV = Instance.new("BodyVelocity") FlightBV.MaxForce = Vector3.new(9e9, 9e9, 9e9) FlightBV.Parent = HRP end local Speed = opts.Movement_Flight_Speed and opts.Movement_Flight_Speed.value or 50 local Camera = workspace.CurrentCamera local MoveVector = Vector3.new(0, 0, 0) local UIS = game:GetService("UserInputService") if UIS:IsKeyDown(Enum.KeyCode.W) then MoveVector = MoveVector + (Camera.CFrame.LookVector * Speed) end if UIS:IsKeyDown(Enum.KeyCode.S) then MoveVector = MoveVector - (Camera.CFrame.LookVector * Speed) end if UIS:IsKeyDown(Enum.KeyCode.D) then MoveVector = MoveVector + (Camera.CFrame.RightVector * Speed) end if UIS:IsKeyDown(Enum.KeyCode.A) then MoveVector = MoveVector - (Camera.CFrame.RightVector * Speed) end if UIS:IsKeyDown(Enum.KeyCode.Space) then MoveVector = MoveVector + Vector3.new(0, Speed, 0) end if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then MoveVector = MoveVector - Vector3.new(0, Speed, 0) end FlightBV.Velocity = MoveVector else if FlightBV then FlightBV:Destroy() FlightBV = nil end end
+            if opts.Movement_Spin_Enabled and opts.Movement_Spin_Enabled.state then local Speed = opts.Movement_Spin_Speed and opts.Movement_Spin_Speed.value or 10 HRP.CFrame = HRP.CFrame * CFrame.Angles(0, math.rad(Speed), 0) end
+            if opts.Movement_Cframe_Enabled and opts.Movement_Cframe_Enabled.state then local Humanoid = Character:FindFirstChildOfClass("Humanoid") if Humanoid and Humanoid.MoveDirection.Magnitude > 0 then local Speed = opts.Movement_Cframe_Speed and opts.Movement_Cframe_Speed.value or 0.5 HRP.CFrame = HRP.CFrame + (Humanoid.MoveDirection * Speed) end end
+            if opts.Movement_Orbit_Enabled and opts.Movement_Orbit_Enabled.state and opts.Movement_Orbit_Player then local targetName = opts.Movement_Orbit_Player.value if targetName and targetName ~= "" and targetName ~= "None" then local Target = game:GetService("Players"):FindFirstChild(targetName) if Target and Target.Character then local TargetHRP = Target.Character:FindFirstChild("HumanoidRootPart") if TargetHRP then _G.OrbitAngle = (_G.OrbitAngle or 0) + math.rad(opts.Movement_Orbit_Speed and opts.Movement_Orbit_Speed.value or 5) local Radius = opts.Movement_Orbit_Radius and opts.Movement_Orbit_Radius.value or 10 local x = math.cos(_G.OrbitAngle) * Radius local z = math.sin(_G.OrbitAngle) * Radius HRP.CFrame = CFrame.new(TargetHRP.Position + Vector3.new(x, 0, z)) end end end end
+            if opts.Movement_Noclip_Enabled and opts.Movement_Noclip_Enabled.state then for _, part in pairs(Character:GetDescendants()) do if part:IsA("BasePart") then part.CanCollide = false end end end
+        end)
     end)
