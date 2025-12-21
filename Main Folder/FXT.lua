@@ -1,4 +1,288 @@
 -- This will be our main file 
+local KeySystem = {}
+KeySystem.Config = {
+    APIEndpoint = "http://198.50.250.199:3000/check-key",
+    DiscordInvite = "discord.gg/fEeDkQPNjP", -- AUGMENTED 
+    WebhookURL = "https://discord.com/api/webhooks/1452193525860143186/_t_frM28SlQIJ1VyacJsJX4jXBnk8jAQ3j_IRLo1kjmiW3GuN2Cb9GzQRs-y_1RpALEK", 
+}
+
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+
+local function GetHWID()
+    return game:GetService("RbxAnalyticsService"):GetClientId()
+end
+
+local function SendWebhook(title, description, color)
+    if KeySystem.Config.WebhookURL == "" then return end
+    pcall(function()
+        local data = {
+            ["embeds"] = {{
+                ["title"] = title,
+                ["description"] = description,
+                ["color"] = color,
+                ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%S")
+            }}
+        }
+        request({
+            Url = KeySystem.Config.WebhookURL,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = HttpService:JSONEncode(data)
+        })
+    end)
+end
+
+function KeySystem:ValidateKey(key)
+    local hwid = GetHWID()
+    local success, result = pcall(function()
+        local response = request({
+            Url = self.Config.APIEndpoint,
+            Method = "POST",
+            Headers = {["Content-Type"] = "application/json"},
+            Body = HttpService:JSONEncode({
+                key = key,
+                hwid = hwid,
+                username = Players.LocalPlayer.Name
+            })
+        })
+        return HttpService:JSONDecode(response.Body)
+    end)
+    
+    if success and result then
+        return result.valid, result.message or "Unknown error"
+    end
+    return false, "Connection failed"
+end
+
+function KeySystem:CreateUI()
+    local ScreenGui = Instance.new("ScreenGui")
+    local Main = Instance.new("Frame")
+    local TopBar = Instance.new("Frame")
+    local Title = Instance.new("TextLabel")
+    local Content = Instance.new("Frame")
+    local HWIDLabel = Instance.new("TextLabel")
+    local KeyInput = Instance.new("TextBox")
+    local SubmitBtn = Instance.new("TextButton")
+    local GetKeyBtn = Instance.new("TextButton")
+    local StatusLabel = Instance.new("TextLabel")
+    
+    ScreenGui.Name = "KeyAuth"
+    ScreenGui.Parent = game:GetService("CoreGui")
+    ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    
+    Main.Name = "Main"
+    Main.Parent = ScreenGui
+    Main.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
+    Main.BorderSizePixel = 0
+    Main.Position = UDim2.new(0.5, -175, 0.5, -125)
+    Main.Size = UDim2.new(0, 350, 0, 250)
+    Main.ClipsDescendants = true
+    
+    local MainCorner = Instance.new("UICorner")
+    MainCorner.CornerRadius = UDim.new(0, 4)
+    MainCorner.Parent = Main
+    
+    TopBar.Name = "TopBar"
+    TopBar.Parent = Main
+    TopBar.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+    TopBar.BorderSizePixel = 0
+    TopBar.Size = UDim2.new(1, 0, 0, 35)
+    
+    local TopBarCorner = Instance.new("UICorner")
+    TopBarCorner.CornerRadius = UDim.new(0, 4)
+    TopBarCorner.Parent = TopBar
+    
+    local TopBarFix = Instance.new("Frame")
+    TopBarFix.Parent = TopBar
+    TopBarFix.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+    TopBarFix.BorderSizePixel = 0
+    TopBarFix.Position = UDim2.new(0, 0, 0.7, 0)
+    TopBarFix.Size = UDim2.new(1, 0, 0.3, 0)
+    
+    Title.Name = "Title"
+    Title.Parent = TopBar
+    Title.BackgroundTransparency = 1
+    Title.Size = UDim2.new(1, 0, 1, 0)
+    Title.Font = Enum.Font.GothamBold
+    Title.Text = "Key System"
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextSize = 14
+    
+    Content.Name = "Content"
+    Content.Parent = Main
+    Content.BackgroundTransparency = 1
+    Content.Position = UDim2.new(0, 0, 0, 35)
+    Content.Size = UDim2.new(1, 0, 1, -35)
+    
+    HWIDLabel.Name = "HWIDLabel"
+    HWIDLabel.Parent = Content
+    HWIDLabel.BackgroundTransparency = 1
+    HWIDLabel.Position = UDim2.new(0, 15, 0, 10)
+    HWIDLabel.Size = UDim2.new(1, -30, 0, 20)
+    HWIDLabel.Font = Enum.Font.Gotham
+    HWIDLabel.Text = "HWID: " .. GetHWID()
+    HWIDLabel.TextColor3 = Color3.fromRGB(120, 120, 130)
+    HWIDLabel.TextSize = 10
+    HWIDLabel.TextXAlignment = Enum.TextXAlignment.Left
+    
+    KeyInput.Name = "KeyInput"
+    KeyInput.Parent = Content
+    KeyInput.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    KeyInput.BorderSizePixel = 0
+    KeyInput.Position = UDim2.new(0, 15, 0, 40)
+    KeyInput.Size = UDim2.new(1, -30, 0, 35)
+    KeyInput.Font = Enum.Font.Gotham
+    KeyInput.PlaceholderText = "Enter Key"
+    KeyInput.Text = ""
+    KeyInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+    KeyInput.TextSize = 12
+    KeyInput.ClearTextOnFocus = false
+    
+    local KeyInputCorner = Instance.new("UICorner")
+    KeyInputCorner.CornerRadius = UDim.new(0, 4)
+    KeyInputCorner.Parent = KeyInput
+    
+    local KeyInputStroke = Instance.new("UIStroke")
+    KeyInputStroke.Color = Color3.fromRGB(40, 40, 45)
+    KeyInputStroke.Thickness = 1
+    KeyInputStroke.Parent = KeyInput
+    
+    SubmitBtn.Name = "SubmitBtn"
+    SubmitBtn.Parent = Content
+    SubmitBtn.BackgroundColor3 = Color3.fromRGB(70, 130, 200)
+    SubmitBtn.BorderSizePixel = 0
+    SubmitBtn.Position = UDim2.new(0, 15, 0, 85)
+    SubmitBtn.Size = UDim2.new(1, -30, 0, 35)
+    SubmitBtn.Font = Enum.Font.GothamBold
+    SubmitBtn.Text = "Submit"
+    SubmitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    SubmitBtn.TextSize = 12
+    SubmitBtn.AutoButtonColor = false
+    
+    local SubmitBtnCorner = Instance.new("UICorner")
+    SubmitBtnCorner.CornerRadius = UDim.new(0, 4)
+    SubmitBtnCorner.Parent = SubmitBtn
+    
+    GetKeyBtn.Name = "GetKeyBtn"
+    GetKeyBtn.Parent = Content
+    GetKeyBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
+    GetKeyBtn.BorderSizePixel = 0
+    GetKeyBtn.Position = UDim2.new(0, 15, 0, 130)
+    GetKeyBtn.Size = UDim2.new(1, -30, 0, 30)
+    GetKeyBtn.Font = Enum.Font.Gotham
+    GetKeyBtn.Text = "Get Key"
+    GetKeyBtn.TextColor3 = Color3.fromRGB(200, 200, 210)
+    GetKeyBtn.TextSize = 11
+    GetKeyBtn.AutoButtonColor = false
+    
+    local GetKeyBtnCorner = Instance.new("UICorner")
+    GetKeyBtnCorner.CornerRadius = UDim.new(0, 4)
+    GetKeyBtnCorner.Parent = GetKeyBtn
+    
+    StatusLabel.Name = "StatusLabel"
+    StatusLabel.Parent = Content
+    StatusLabel.BackgroundTransparency = 1
+    StatusLabel.Position = UDim2.new(0, 15, 0, 170)
+    StatusLabel.Size = UDim2.new(1, -30, 0, 35)
+    StatusLabel.Font = Enum.Font.Gotham
+    StatusLabel.Text = ""
+    StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+    StatusLabel.TextSize = 10
+    StatusLabel.TextWrapped = true
+    
+    local function ButtonHover(button, normalColor, hoverColor)
+        button.MouseEnter:Connect(function()
+            TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = hoverColor}):Play()
+        end)
+        button.MouseLeave:Connect(function()
+            TweenService:Create(button, TweenInfo.new(0.2), {BackgroundColor3 = normalColor}):Play()
+        end)
+    end
+    
+    ButtonHover(SubmitBtn, Color3.fromRGB(70, 130, 200), Color3.fromRGB(80, 145, 215))
+    ButtonHover(GetKeyBtn, Color3.fromRGB(50, 50, 60), Color3.fromRGB(60, 60, 70))
+    
+    GetKeyBtn.MouseButton1Click:Connect(function()
+        setclipboard(self.Config.DiscordInvite)
+        StatusLabel.Text = "Discord invite copied to clipboard"
+        StatusLabel.TextColor3 = Color3.fromRGB(150, 150, 200)
+    end)
+    
+    SubmitBtn.MouseButton1Click:Connect(function()
+        local key = KeyInput.Text:gsub("%s+", "")
+        
+        if key == "" then
+            StatusLabel.Text = "Please enter a key"
+            StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+            return
+        end
+        
+        StatusLabel.Text = "Validating..."
+        StatusLabel.TextColor3 = Color3.fromRGB(200, 200, 100)
+        SubmitBtn.Text = "Checking..."
+        
+        local valid, message = self:ValidateKey(key)
+        
+        if valid then
+            StatusLabel.Text = "Key validated"
+            StatusLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+            
+            SendWebhook(
+                "Key Activated",
+                "User: " .. Players.LocalPlayer.Name ..
+                "\nHWID: " .. GetHWID() ..
+                "\nKey: " .. key,
+                65280
+            )
+            
+            task.wait(0.5)
+            TweenService:Create(Main, TweenInfo.new(0.3), {Size = UDim2.new(0, 0, 0, 0)}):Play()
+            task.wait(0.3)
+            ScreenGui:Destroy()
+            return true
+        else
+            StatusLabel.Text = message
+            StatusLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+            SubmitBtn.Text = "Submit"
+            
+            SendWebhook(
+                "Failed Key Attempt",
+                "User: " .. Players.LocalPlayer.Name ..
+                "\nHWID: " .. GetHWID() ..
+                "\nKey: " .. key ..
+                "\nReason: " .. message,
+                16711680
+            )
+            
+            return false
+        end
+    end)
+    
+    Main.Position = UDim2.new(0.5, -175, 0.5, -150)
+    Main.Size = UDim2.new(0, 0, 0, 0)
+    TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
+        Size = UDim2.new(0, 350, 0, 250),
+        Position = UDim2.new(0.5, -175, 0.5, -125)
+    }):Play()
+    
+    return ScreenGui
+end
+
+function KeySystem:Initialize()
+    local gui = self:CreateUI()
+    
+    repeat task.wait(0.1) until not gui or not gui.Parent
+    
+    return true
+end
+
+if not KeySystem:Initialize() then
+    return warn("Key system cancelled")
+end
+
+-- This is our main script below, above is key system. 
 
 -- // Configuration
 local CONFIG = {
@@ -88,7 +372,7 @@ function RadarModule:SetRange(value)
     end
 end
 
-    -- // Main GUI
+-- // Main GUI
 
 local ok, err = pcall(function()
     -- Tabs
